@@ -10,10 +10,13 @@ def xor_bytes(key_stream, message):
     return bytes([key_stream[i] ^ message[i] for i in range(length)])
 
 
-message = "YOU ARE AWESOME".encode()
+# this is the enemy
+message = "DO ATTACK".encode()
 key_stream = generate_key_stream(len(message))
 cipher = xor_bytes(key_stream, message)
-print(key_stream)
+
+# this is us trying to break it
 print(cipher)
-original_msg = xor_bytes(key_stream, cipher)
-print(original_msg)
+message = "NO ATTACK".encode()
+guess_key_stream = xor_bytes(message, cipher)
+print(xor_bytes(guess_key_stream, cipher))

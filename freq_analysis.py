@@ -136,8 +136,6 @@ attack.set_key_mapping('c', 'w')
 attack.set_key_mapping('a', 'x')
 attack.set_key_mapping('f', 'q')
 
-
-
 attack.guess_key()
 print(key := attack.get_key())
 
