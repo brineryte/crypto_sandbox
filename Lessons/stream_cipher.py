@@ -8,11 +8,11 @@ class KeyStream:
 
     # PSG
     def rand(self):
-        self.next = (1103515245 * self.next + 12345) % 2 ** 31
+        self.next = (1103515245 * self.next + 12345) % 2**31
         return self.next
 
     def get_key_byte(self):
-        return self.rand() % 256
+        return (self.rand()//2**23) % 256
 
 
 def encrypt(key, message):
@@ -54,6 +54,7 @@ def get_key(message, cipher):
 def crack(key_stream, cipher):
     length = min(len(key_stream), len(cipher))
     return bytes([key_stream[i] ^ cipher[i] for i in range(length)])
+
 
 def run_txmt_example():
     key = KeyStream(1929)
@@ -131,4 +132,38 @@ def run_alice_eve_example():
     print("THIS IS EVE")
     print(crack(eves_key_stream, cipher))
 
-run_alice_eve_example()
+
+def brute_force(plain, cipher):
+    for k in range(2 ** 31):
+        bf_key = KeyStream(k)
+        for i in range(len(plain)):
+            xor_value = plain[i] ^ cipher[i]
+            if xor_value != bf_key.get_key_byte():
+                break
+        else:
+            return k
+    return False
+
+
+def run_low_entropy_example():
+    # this is Alice
+    header = "MESSAGE: "
+    print(secret_key := random.randrange(0, 2**23))
+    key = KeyStream(secret_key)
+    message = header + "My secret message to Bob"
+    print(message := message.encode())
+    print(cipher := encrypt(key, message))
+
+    # This is Bob
+    key = KeyStream(secret_key)
+    print(message := encrypt(key, cipher))
+
+    # This is Eve
+    bf_key = brute_force(header.encode(), cipher)
+    print("Eve's brute force key: ", bf_key)
+    key = KeyStream(bf_key)
+    print(message := encrypt(key, cipher))
+
+
+
+run_low_entropy_example()
